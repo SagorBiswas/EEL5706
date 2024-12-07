@@ -76,44 +76,41 @@ def generate_rs_parity_v2(weights, p):
 
 ################################## Server side codes #############################################
 
-# class Weight_varifier:
-#     def __init__(self, parity_bits):
-#         self.__stored_parity = parity_bits
+class Weight_varifier:
+    def __init__(self, parity_bits):
+        self.__stored_parity = parity_bits
 
-#     def encode(self):
-#         print(f"Variable 1: {self.var1}")
-#         print(f"Variable 2: {self.var2}")
+    def encode(self):
+        print(f"Variable 1: {self.var1}")
+        print(f"Variable 2: {self.var2}")
 
-#     def update_variables(self, new_var1, new_var2):
-#         self.var1 = new_var1
-#         self.var2 = new_var2
-#         print("Variables updated successfully.")
+    def update_variables(self, new_var1, new_var2):
+        self.var1 = new_var1
+        self.var2 = new_var2
+        print("Variables updated successfully.")
 
-#     def generate_rs_parity(self, weights, layer=0, kernel_indx=0):
-#         p = hash_to_range (layer+kernel_indx)
+    def generate_rs_parity(self, weights, layer=0, kernel_indx=0):
+        p = hash_to_range (layer+kernel_indx)
         
-#         # Convert to Bytearray
-#         byte_data = flatten_and_pack_weights(weights)
+        # Convert to Bytearray
+        byte_data = flatten_and_pack_weights(weights)
 
-#         # Generate RS Parity
-#         rs = reedsolo.RSCodec(p)  # Initialize Reed-Solomon encoder
-#         encoded = rs.encode(byte_data)  # rs encode the byte data
+        # Generate RS Parity
+        rs = reedsolo.RSCodec(p)  # Initialize Reed-Solomon encoder
+        encoded = rs.encode(byte_data)  # rs encode the byte data
 
-#         # Extract parity bits (last `p` bytes)
-#         parity_bits = encoded[-p:]  # Last `p` bytes are parity
-
-#         # # print_status
-#         # print("Encoded Data Length:", len(encoded))
-#         # print("Parity Bits:", list(parity_bits))
+        # Extract parity bits (last p bytes)
+        parity_bits = encoded[-p:]  
         
-#         return list(parity_bits)
+        return list(parity_bits)
 
-#     def verify(self):
-#         try:
-#             return self.var1 + self.var2
-#         except TypeError:
-#             print("Variables are not numeric and cannot be added.")
-#             return None
+
+    def verify(self):
+        try:
+            return self.var1 + self.var2
+        except TypeError:
+            print("Variables are not numeric and cannot be added.")
+            return None
         
 
 
@@ -132,6 +129,17 @@ def user_side_verifier(downloaded_weights, server_parity, layer=0, kernel_indx=0
     # Compare parity
     return user_parity[0] == server_parity
     # return Weight_varifier.verify(user_parity)
+
+def user_side_verifier(downloaded_weights, layer=0, kernel_indx=0):
+
+    # the system generates different number of parities based on layer and kernel
+    p = hash_to_range(layer+kernel_indx) 
+
+    # Generate parity for user's weights
+    user_parity = generate_rs_parity_v2(downloaded_weights, p)
+
+    # make call to server class to Compare parity
+    return Weight_varifier.verify(user_parity)
 
 
 
